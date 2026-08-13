@@ -28,25 +28,6 @@ build:
   # py3.14t (free-threaded) only supported from v24 onwards
   skip: true  # [is_freethreading]
   {% endif %}
-  script:
-    - set eux  # [unix]
-    - export MONGO_NO_COPY_LIBBSON=1              # [unix]
-    - export LIBBSON_INSTALL_DIR="${PREFIX}"      # [unix]
-    - export MONGO_CREATE_LIBARROW_SYMLINKS=0     # [unix]
-    - export LDFLAGS="${LDFLAGS} -Wl,-rpath,${PREFIX}/lib"  # [unix]
-    - export CMAKE_GENERATOR=Ninja                # [unix]
-    # find_program(cython) picks up the host-prefix script, whose shebang
-    # (padded for conda-build's prefix replacement) exceeds Linux's shebang
-    # length limit and silently runs under the wrong interpreter. Shim it
-    # with a short script that invokes cython as a module instead.
-    - mkdir -p "${SRC_DIR}/_cmake_shims"                                    # [unix]
-    - printf '#!/bin/sh\nexec "%s" -m cython "$@"\n' "{{ PYTHON }}" > "${SRC_DIR}/_cmake_shims/cython"  # [unix]
-    - chmod +x "${SRC_DIR}/_cmake_shims/cython"   # [unix]
-    - export PATH="${SRC_DIR}/_cmake_shims:${PATH}"  # [unix]
-    - set MONGO_NO_COPY_LIBBSON=1                 # [win]
-    - set "LIBBSON_INSTALL_DIR=%LIBRARY_PREFIX%"  # [win]
-    - set MONGO_CREATE_LIBARROW_SYMLINKS=0         # [win]
-    - {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vvv
 
 requirements:
   build:
