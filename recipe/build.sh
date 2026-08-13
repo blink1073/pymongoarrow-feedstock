@@ -11,13 +11,15 @@ export CMAKE_GENERATOR=Ninja
 # script, whose shebang (padded for conda-build's later prefix replacement)
 # exceeds Linux's shebang length limit and silently runs under the wrong
 # interpreter. Shim it with a short script that invokes cython as a module
-# instead, and put it first on PATH.
+# instead. scikit-build-core sets CMAKE_PROGRAM_PATH to the prefix bin dirs,
+# which find_program() searches before PATH, so point CYTHON_EXECUTABLE at
+# the shim directly rather than relying on PATH order.
 mkdir -p "${SRC_DIR}/_cmake_shims"
 cat > "${SRC_DIR}/_cmake_shims/cython" <<SHIM
 #!/bin/sh
 exec "${PYTHON}" -m cython "\$@"
 SHIM
 chmod +x "${SRC_DIR}/_cmake_shims/cython"
-export PATH="${SRC_DIR}/_cmake_shims:${PATH}"
+export CMAKE_ARGS="${CMAKE_ARGS:-} -DCYTHON_EXECUTABLE=${SRC_DIR}/_cmake_shims/cython"
 
 "${PYTHON}" -m pip install . --no-deps --no-build-isolation -vvv
